@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace scripts.shinobi
 {
@@ -7,6 +9,7 @@ namespace scripts.shinobi
     {
         private readonly MovementInputReader movementInputReader;
         private readonly JumpInputReader jumpInputReader;
+        private readonly AttackInputReader attackInputReader;
         public float Speed = 0.5f;
         public float JumpSpeed = 1.0f;
         private Animator animator;
@@ -17,6 +20,7 @@ namespace scripts.shinobi
 
         public ShinobiController()
         {
+            this.attackInputReader = new AttackInputReader();
             this.jumpInputReader = new JumpInputReader();
             this.movementInputReader = new MovementInputReader();
         }
@@ -46,9 +50,8 @@ namespace scripts.shinobi
             }
         }
 
-        private void HandleMovement()
+        private void HandleMovement(MovementInputReader.Movement movement)
         {
-            var movement = movementInputReader.Read();
             if (movement == MovementInputReader.Movement.Right)
             {
                 rigidBody2D.velocity = new Vector2(Speed, rigidBody2D.velocity.y);
@@ -63,12 +66,12 @@ namespace scripts.shinobi
             }
         }
 
-        private void HandleJumping(float deltaTime)
+        private void HandleJumping(JumpInputReader.JumpState jumpState, float deltaTime)
         {
-            if (jumpInputReader.Read(deltaTime).Equals(JumpInputReader.JumpState.Started))
+            if (jumpState.Equals(JumpInputReader.JumpState.Started))
             {
                 isGrounded = false;
-                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);                
+                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);
             }
         }
 
@@ -97,8 +100,17 @@ namespace scripts.shinobi
 
         public void FixedUpdate()
         {
-            HandleMovement();
-            HandleJumping(Time.deltaTime);
+            var deltaTime = Time.deltaTime;
+            var movement = movementInputReader.Read();
+            var jump = jumpInputReader.Read(deltaTime);
+            var attack = attackInputReader.Read(deltaTime);
+
+            Debug.Log(movement);
+            Debug.Log(jump);
+            Debug.Log(attack);
+
+            HandleMovement(movement);
+            HandleJumping(jump, deltaTime);
         }
     }
 }
