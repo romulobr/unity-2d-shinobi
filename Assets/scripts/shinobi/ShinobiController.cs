@@ -66,11 +66,10 @@ namespace scripts.shinobi
 
         private void HandleJumping()
         {
-            if (jumpReader.Read().Equals(ShinobiJumpReader.JumpState.Ascending))
+            if (jumpReader.Read().Equals(ShinobiJumpReader.JumpState.Started))
             {
                 isGrounded = false;
-                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);
-                //                GetComponent<Rigidbody2D>().AddForce(Vector2.up*JumpSpeed);
+                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);                
             }
         }
 
@@ -84,8 +83,7 @@ namespace scripts.shinobi
         {
             if (rigidBody2D.velocity.y <= 0.1)
             {
-                isGrounded = true;
-                HandleMovement();
+                jumpReader.ResetJumpState();
             }
         }
 
