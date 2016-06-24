@@ -2,7 +2,7 @@
 
 namespace scripts.shinobi
 {
-    public class ShinobiMovementReader
+    public class MovementInputReader
     {
         public enum Movement
         {

@@ -5,8 +5,8 @@ namespace scripts.shinobi
 {
     public class ShinobiController : MonoBehaviour
     {
-        private readonly ShinobiMovementReader movementReader;
-        private readonly ShinobiJumpReader jumpReader;
+        private readonly MovementInputReader movementInputReader;
+        private readonly JumpInputReader jumpInputReader;
         public float Speed = 0.5f;
         public float JumpSpeed = 1.0f;
         private Animator animator;
@@ -17,8 +17,8 @@ namespace scripts.shinobi
 
         public ShinobiController()
         {
-            this.jumpReader = new ShinobiJumpReader();
-            this.movementReader = new ShinobiMovementReader();
+            this.jumpInputReader = new JumpInputReader();
+            this.movementInputReader = new MovementInputReader();
         }
 
         public void Start()
@@ -48,16 +48,16 @@ namespace scripts.shinobi
 
         private void HandleMovement()
         {
-            var movement = movementReader.Read();
-            if (movement == ShinobiMovementReader.Movement.Right)
+            var movement = movementInputReader.Read();
+            if (movement == MovementInputReader.Movement.Right)
             {
                 rigidBody2D.velocity = new Vector2(Speed, rigidBody2D.velocity.y);
             }
-            else if (movement == ShinobiMovementReader.Movement.Left)
+            else if (movement == MovementInputReader.Movement.Left)
             {
                 rigidBody2D.velocity = new Vector2(-Speed, rigidBody2D.velocity.y);
             }
-            else if (movement == ShinobiMovementReader.Movement.None)
+            else if (movement == MovementInputReader.Movement.None)
             {
                 rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
             }
@@ -65,7 +65,7 @@ namespace scripts.shinobi
 
         private void HandleJumping(float deltaTime)
         {
-            if (jumpReader.Read(deltaTime).Equals(ShinobiJumpReader.JumpState.Started))
+            if (jumpInputReader.Read(deltaTime).Equals(JumpInputReader.JumpState.Started))
             {
                 isGrounded = false;
                 rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);                
@@ -82,7 +82,7 @@ namespace scripts.shinobi
         {
             if (rigidBody2D.velocity.y <= 0.1)
             {
-                jumpReader.ResetJumpState();
+                jumpInputReader.ResetJumpState();
             }
         }
 

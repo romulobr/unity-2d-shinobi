@@ -2,7 +2,7 @@
 
 namespace scripts.shinobi
 {
-    public class ShinobiJumpReader
+    public class JumpInputReader
     {
         public enum JumpState
         {
