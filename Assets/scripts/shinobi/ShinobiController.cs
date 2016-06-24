@@ -28,7 +28,6 @@ namespace scripts.shinobi
             rigidBody2D = GetComponent<Rigidbody2D>();
         }
 
-
         private void Walk()
         {
             if (isGrounded && !animator.GetCurrentAnimatorStateInfo(0).IsName("sword-attack"))
@@ -64,9 +63,9 @@ namespace scripts.shinobi
             }
         }
 
-        private void HandleJumping()
+        private void HandleJumping(float deltaTime)
         {
-            if (jumpReader.Read().Equals(ShinobiJumpReader.JumpState.Started))
+            if (jumpReader.Read(deltaTime).Equals(ShinobiJumpReader.JumpState.Started))
             {
                 isGrounded = false;
                 rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);                
@@ -99,7 +98,7 @@ namespace scripts.shinobi
         public void FixedUpdate()
         {
             HandleMovement();
-            HandleJumping();
+            HandleJumping(Time.deltaTime);
         }
     }
 }
