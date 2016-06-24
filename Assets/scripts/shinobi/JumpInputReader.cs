@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace scripts.shinobi
 {
@@ -14,21 +15,23 @@ namespace scripts.shinobi
         private JumpState currentState = JumpState.None;
         private const float MaximumJumpDuration = 0.2f;
         private float jumpDuration = 0.0f;
+        private bool readyToJump = true;
 
         public void ResetJumpState()
         {
             currentState = JumpState.None;
-            jumpDuration = 0;
+            jumpDuration = 0;            
         }
 
         public JumpState Read(float deltaTime)
         {
-            var buttonIsPressed = Input.GetButton("Jump") && Input.GetAxis("Jump") > 0;
+            var buttonIsPressedNow = (Input.GetButton("Jump") && Input.GetAxis("Jump") > 0);
 
-            if (buttonIsPressed)
-            {
-                if (currentState == JumpState.None)
+            if (buttonIsPressedNow)
+            {                
+                if (currentState == JumpState.None && readyToJump)
                 {
+                    readyToJump = false;
                     currentState = JumpState.Started;
                     jumpDuration = 0;
                 }
@@ -36,17 +39,11 @@ namespace scripts.shinobi
                 {
                     currentState = JumpState.Started;
                     jumpDuration += deltaTime;
-                    Debug.Log(jumpDuration);
                     if (jumpDuration >= MaximumJumpDuration)
                     {
                         currentState = JumpState.Ended;
                     }
                 }
-                if (currentState == JumpState.Ended)
-                {
-                    currentState = JumpState.Ended;
-                }
-                return currentState;
             }
             else
             {
@@ -54,8 +51,11 @@ namespace scripts.shinobi
                 {
                     currentState = JumpState.Ended;
                 }
+                else
+                {
+                    readyToJump = true;
+                }
             }
-
             return currentState;
         }
     }
