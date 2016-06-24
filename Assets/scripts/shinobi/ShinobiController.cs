@@ -1,105 +1,107 @@
 ﻿using System;
 using UnityEngine;
-using System.Collections;
 
-public class ShinobiController : MonoBehaviour
+namespace scripts.shinobi
 {
-    public float Speed = 0.5f;
-    public float JumpSpeed = 1.0f;
-    private Animator animator;
-    private SpriteRenderer spriteRenderer;
-    private Rigidbody2D rigidBody2D;
-    public float JumpDuration = 1000f;
-    private bool isGrounded = false;
-    private float totalJumpForce = 0.0f;
-
-    public void Start()
+    public class ShinobiController : MonoBehaviour
     {
-        animator = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        rigidBody2D = GetComponent<Rigidbody2D>();
-    }
+        private readonly ShinobiMovementReader movementReader;
+        private readonly ShinobiJumpReader jumpReader;
+        public float Speed = 0.5f;
+        public float JumpSpeed = 1.0f;
+        private Animator animator;
+        private SpriteRenderer spriteRenderer;
+        private Rigidbody2D rigidBody2D;
+        public float JumpDuration = 1000f;
+        private bool isGrounded = false;
 
-
-
-    private void Walk()
-    {
-        if (isGrounded && !animator.GetCurrentAnimatorStateInfo(0).IsName("sword-attack"))
+        public ShinobiController()
         {
-            animator.Play("walking");
-            animator.SetBool("isWalking", true);
+            this.jumpReader = new ShinobiJumpReader();
+            this.movementReader = new ShinobiMovementReader();
         }
-    }
 
-    private void Idle()
-    {
-        if (isGrounded)
+        public void Start()
         {
-            animator.Play("idle");
-            animator.SetBool("isWalking", false);
+            animator = GetComponent<Animator>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            rigidBody2D = GetComponent<Rigidbody2D>();
         }
-    }
 
-    private void HandleMovement()
-    {
-        var horizontalAxis = getRoundedBinaryHorizontal();
-        if (Math.Abs(horizontalAxis) > 0.1)
+
+        private void Walk()
         {
-            rigidBody2D.velocity = new Vector2(horizontalAxis*Speed, rigidBody2D.velocity.y);
-            spriteRenderer.flipX = horizontalAxis < 0;
-            Walk();
-        }
-        else
-        {
-            if (!animator.GetCurrentAnimatorStateInfo(0).IsName("sword-attack"))
+            if (isGrounded && !animator.GetCurrentAnimatorStateInfo(0).IsName("sword-attack"))
             {
-                Idle();
+                animator.Play("walking");
+                animator.SetBool("isWalking", true);
             }
         }
-    }
 
-    private void HandleJumping()
-    {
-        if (ShouldStartJumping())
+        private void Idle()
         {
-            isGrounded = false;
-            animator.Play("jumping");
-            GetComponent<Rigidbody2D>().AddForce(Vector2.up*JumpSpeed);
-        }        
-    }
+            if (isGrounded)
+            {
+                animator.Play("idle");
+                animator.SetBool("isWalking", false);
+            }
+        }
 
-    private bool ShouldStartJumping()
-    {
-        return Input.GetButton("Jump") && Input.GetAxis("Jump") > 0 && isGrounded;
-    }
-
-    private bool IsAttacking()
-    {
-        return Input.GetButtonDown("Fire1") && !animator.GetCurrentAnimatorStateInfo(0).IsName("sword-attack") &&
-               Input.GetAxis("Fire1") > 0;
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (rigidBody2D.velocity.y <= 0.1)
+        private void HandleMovement()
         {
-            isGrounded = true;
+            var movement = movementReader.Read();
+            if (movement == ShinobiMovementReader.Movement.Right)
+            {
+                rigidBody2D.velocity = new Vector2(Speed, rigidBody2D.velocity.y);
+            }
+            else if (movement == ShinobiMovementReader.Movement.Left)
+            {
+                rigidBody2D.velocity = new Vector2(-Speed, rigidBody2D.velocity.y);
+            }
+            else if (movement == ShinobiMovementReader.Movement.None)
+            {
+                rigidBody2D.velocity = new Vector2(0, rigidBody2D.velocity.y);
+            }
+        }
+
+        private void HandleJumping()
+        {
+            if (jumpReader.Read().Equals(ShinobiJumpReader.JumpState.Ascending))
+            {
+                isGrounded = false;
+                rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);
+                //                GetComponent<Rigidbody2D>().AddForce(Vector2.up*JumpSpeed);
+            }
+        }
+
+        private bool IsAttacking()
+        {
+            return Input.GetButtonDown("Fire1") && !animator.GetCurrentAnimatorStateInfo(0).IsName("sword-attack") &&
+                   Input.GetAxis("Fire1") > 0;
+        }
+
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (rigidBody2D.velocity.y <= 0.1)
+            {
+                isGrounded = true;
+                HandleMovement();
+            }
+        }
+
+        public void Update()
+        {
+            if (IsAttacking())
+            {
+                animator.Play("sword-attack");
+                animator.SetBool("isWalking", false);
+            }
+        }
+
+        public void FixedUpdate()
+        {
             HandleMovement();
+            HandleJumping();
         }
-    }
-
-    public void Update()
-    {
-        if (IsAttacking())
-        {
-            animator.Play("sword-attack");
-            animator.SetBool("isWalking", false);
-        }
-    }
-
-    public void FixedUpdate()
-    {
-//        HandleMovement();
-        HandleJumping();
     }
 }
