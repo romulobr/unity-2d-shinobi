@@ -16,11 +16,10 @@ namespace scripts.shinobi
         private Animator animator;
         private SpriteRenderer spriteRenderer;
         private Rigidbody2D rigidBody2D;
-        public Text debugText;
+        public Text DebugText;
 
         public float Speed = 0.5f;
         public float JumpSpeed = 1.0f;
-        private bool isGrounded = false;
 
         public ShinobiController()
         {
@@ -59,7 +58,6 @@ namespace scripts.shinobi
         {
             if (jumpState == JumpInputReader.JumpState.Started)
             {
-                isGrounded = false;
                 rigidBody2D.velocity = new Vector2(rigidBody2D.velocity.x, JumpSpeed);
             }
         }
@@ -80,7 +78,7 @@ namespace scripts.shinobi
             var attack = attackInputReader.Read(deltaTime);
             var selectedAnimation = animationDirector.SelectAnimationFor(movement, jump, attack);
 
-            debugText.text = selectedAnimation+" > "+movement.ToString()+" / Jump"+jump.ToString() + " / " + attack.ToString();
+            DebugText.text = selectedAnimation+" > "+movement.ToString()+" / Jump"+jump.ToString() + " / " + attack.ToString();
             HandleMovement(movement);
             HandleJumping(jump);
             
