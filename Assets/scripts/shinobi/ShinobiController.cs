@@ -14,9 +14,9 @@ namespace scripts.shinobi
         private readonly AnimationDirector animationDirector;
 
         private Animator animator;
-        private SpriteRenderer spriteRenderer;
         private Rigidbody2D rigidBody2D;
         public Text DebugText;
+        public GameObject UnityChan;
 
         public float Speed = 0.5f;
         public float JumpSpeed = 1.0f;
@@ -31,8 +31,7 @@ namespace scripts.shinobi
 
         public void Start()
         {
-            animator = GetComponent<Animator>();
-            spriteRenderer = GetComponent<SpriteRenderer>();
+            animator = UnityChan.GetComponent<Animator>();
             rigidBody2D = GetComponent<Rigidbody2D>();
         }
 
@@ -40,13 +39,16 @@ namespace scripts.shinobi
         {
             if (movement == MovementInputReader.Movement.Right)
             {
-                spriteRenderer.flipX = false;
+                UnityChan.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+                print("right");
                 rigidBody2D.velocity = new Vector2(Speed, rigidBody2D.velocity.y);
             }
             else if (movement == MovementInputReader.Movement.Left)
             {
+                print("left");
                 rigidBody2D.velocity = new Vector2(-Speed, rigidBody2D.velocity.y);
-                spriteRenderer.flipX = true;
+                UnityChan.transform.localScale = new Vector3(0.4f, 0.4f, -0.4f);
+
             }
             else if (movement == MovementInputReader.Movement.None)
             {
